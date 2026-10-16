@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+<title>Oficina de Homilética</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,700&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: ampulheta como navegação fixa à esquerda (topo no celular); cada passo é uma "estação" com regras, atividade e quiz. */
+:root{
+  --bg:#F2F4F6; --surface:#FFFFFF; --ink:#16213A; --muted:#5A6478; --line:#D9DEE6;
+  --accent:#1F4FA8; --accent-soft:#E3EBF8; --gold:#B7862B; --gold-soft:#F6EDD9;
+  --ok:#1E7A4F; --ok-soft:#E1F2E9; --bad:#B23A3A; --bad-soft:#F7E3E3;
+  --f-display:"Literata", Georgia, serif; --f-body:"Source Sans 3", system-ui, sans-serif; --f-mono:"IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F1522; --surface:#18202F; --ink:#E7ECF5; --muted:#9AA5B8; --line:#2A3446;
+  --accent:#7FA6EE; --accent-soft:#1E2B45; --gold:#E0B35C; --gold-soft:#33291A;
+  --ok:#5FC896; --ok-soft:#173326; --bad:#EE8A8A; --bad-soft:#3A1E22; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1522; --surface:#18202F; --ink:#E7ECF5; --muted:#9AA5B8; --line:#2A3446;
+  --accent:#7FA6EE; --accent-soft:#1E2B45; --gold:#E0B35C; --gold-soft:#33291A;
+  --ok:#5FC896; --ok-soft:#173326; --bad:#EE8A8A; --bad-soft:#3A1E22; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:400 17px/1.6 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.2;margin:0}
+h1{font-size:clamp(28px,4vw,40px)} h2{font-size:clamp(24px,3vw,30px)} h3{font-size:19px}
+p{margin:0}
+.wrap{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:260px minmax(0,1fr);gap:32px;align-items:start}
+@media (max-width:820px){.wrap{grid-template-columns:minmax(0,1fr)}}
+header.top{max-width:1120px;margin:0 auto 24px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between}
+.eyebrow{font:500 12px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.lead{color:var(--muted);max-width:60ch;margin-top:6px}
+.xp{display:flex;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.xp b{font:500 22px var(--f-mono);color:var(--accent);font-variant-numeric:tabular-nums}
+.xp small{color:var(--muted);display:block;line-height:1.2}
+.bar{height:8px;width:140px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--gold);width:0;transition:width .5s}
+
+/* Ampulheta */
+nav.hg{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}
+@media (max-width:820px){nav.hg{position:static}}
+.hg svg{width:100%;max-width:260px;height:auto;display:block}
+.hg .seg{cursor:pointer}
+.hg .seg rect{fill:var(--surface);stroke:var(--line);stroke-width:1.5;transition:fill .2s,stroke .2s}
+.hg .seg text{fill:var(--ink);font:600 14px var(--f-body)}
+.hg .seg .n{font:500 12px var(--f-mono);fill:var(--muted)}
+.hg .seg.done rect{fill:var(--ok-soft);stroke:var(--ok)}
+.hg .seg.on rect{fill:var(--accent);stroke:var(--accent)}
+.hg .seg.on text,.hg .seg.on .n{fill:var(--bg)}
+.hg .seg:focus-visible rect{stroke:var(--gold);stroke-width:3}
+.hg .lbl{font:500 11px var(--f-mono);letter-spacing:.1em;fill:var(--gold)}
+.hg .shape{fill:none;stroke:var(--muted);stroke-width:1.5;stroke-dasharray:4 4}
+
+/* Estação */
+main{min-width:0}
+.station{display:grid;gap:20px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px}
+.head{display:grid;gap:8px}
+.tag{display:inline-flex;gap:8px;align-items:center;font:500 12px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.q{font-family:var(--f-display);font-style:italic;color:var(--gold);font-size:19px}
+.rules{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.rule{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.rule button{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:flex;gap:12px;align-items:center;padding:12px 14px;font-weight:600}
+.rule button:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+.rule .k{font:500 12px var(--f-mono);color:var(--muted);min-width:22px}
+.rule .chev{margin-left:auto;color:var(--muted);transition:transform .2s}
+.rule.open .chev{transform:rotate(90deg)}
+.rule .body{padding:0 14px 14px 48px;color:var(--muted)}
+.rule.seen{border-color:var(--ok)}
+.rule.seen .k{color:var(--ok)}
+.hint{font-size:14px;color:var(--muted)}
+.btn{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:10px;font-weight:700;background:var(--accent);color:var(--bg);transition:transform .1s}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:transparent;color:var(--accent);border:1.5px solid var(--accent)}
+.btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.opts{display:grid;gap:8px}
+.opt{all:unset;box-sizing:border-box;cursor:pointer;border:1.5px solid var(--line);border-radius:10px;padding:10px 14px;background:var(--surface);transition:border-color .15s,background .15s}
+.opt:hover{border-color:var(--accent)}
+.opt:focus-visible{outline:2px solid var(--gold)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.fb{font-weight:600;min-height:1.4em}
+.fb.ok{color:var(--ok)} .fb.no{color:var(--bad)}
+input[type=text],textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px}
+textarea{min-height:80px;resize:vertical}
+input:focus,textarea:focus{outline:none;border-color:var(--accent)}
+.sort{display:grid;gap:8px}
+.sort .item{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.sort .item span{min-width:0;flex:1 1 240px}
+.pill{font:500 12px var(--f-mono);padding:3px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.no{background:var(--bad-soft);color:var(--bad)} .pill.gold{background:var(--gold-soft);color:var(--gold)}
+.meter{position:relative;height:36px;background:var(--bg);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.meter .zone{position:absolute;top:0;bottom:0;background:var(--ok-soft);border-left:2px solid var(--ok);border-right:2px solid var(--ok)}
+.meter .fill{position:absolute;left:0;top:0;bottom:0;background:var(--accent);opacity:.35;transition:width .2s}
+.meter .num{position:absolute;right:10px;top:50%;transform:translateY(-50%);font:500 15px var(--f-mono);font-variant-numeric:tabular-nums}
+.checks{display:grid;gap:6px;list-style:none;padding:0;margin:0}
+.checks li{display:flex;gap:10px;align-items:baseline}
+.checks li::before{content:"○";color:var(--muted);font-weight:700}
+.checks li.ok::before{content:"●";color:var(--ok)}
+.prefix{font-family:var(--f-display);font-weight:700;color:var(--accent)}
+.list{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.list li{display:flex;gap:10px;align-items:flex-start;border-left:3px solid var(--gold);padding:6px 12px;background:var(--bg);border-radius:0 8px 8px 0}
+.list li span{flex:1;min-width:0}
+.x{all:unset;cursor:pointer;color:var(--muted);padding:0 4px}
+.levels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:560px){.levels{grid-template-columns:minmax(0,1fr)}}
+.level{border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+.level b{display:block;font-family:var(--f-display);font-size:20px}
+.level small{color:var(--muted)}
+.slots{display:grid;gap:8px}
+.slot{border:1.5px dashed var(--line);border-radius:10px;padding:10px 14px;min-height:46px;display:flex;gap:10px;align-items:center}
+.slot.filled{border-style:solid;border-color:var(--accent)}
+.slot.right{border-color:var(--ok);background:var(--ok-soft)} .slot.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{all:unset;cursor:pointer;padding:8px 14px;border-radius:999px;border:1.5px solid var(--accent);color:var(--accent);font-weight:600}
+.chip:focus-visible{outline:2px solid var(--gold)}
+.chip[disabled]{opacity:.3;cursor:default}
+.navrow{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,120px);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:700;transition:transform .3s;z-index:20}
+.toast.show{transform:translate(-50%,0)}
+.pop{animation:pop .35s}
+@keyframes pop{50%{transform:scale(1.04)}}
+.big{font:500 48px var(--f-mono);color:var(--accent);font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div>
+    <div class="eyebrow">Preparação Homilética · treinamento interativo</div>
+    <h1>Oficina de Homilética</h1>
+    <p class="lead">Da passagem inteira a 10 palavras, e das 10 palavras para a vida inteira. Abra cada regra, faça as atividades e ganhe pontos. Passagem de exemplo: <b>Romanos 3:21-26 (NVI)</b>.</p>
+  </div>
+  <div class="xp" aria-live="polite">
+    <div><b id="xp">0</b><small>pontos</small></div>
+    <div><div class="bar"><i id="prog"></i></div><small id="progtxt">0 de 7 estações</small></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="hg" aria-label="Passos da homilética">
+    <svg viewBox="0 0 260 470" role="list">
+      <text class="lbl" x="130" y="14" text-anchor="middle">PENSE E REDUZA</text>
+      <path class="shape" d="M10 26 L250 26 L150 230 L250 434 L10 434 L110 230 Z"/>
+      <g id="hgsegs"></g>
+      <text class="lbl" x="130" y="462" text-anchor="middle">APRENDA E VIVA</text>
+    </svg>
+  </nav>
+  <main id="main"></main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const S = [
+ {id:"intro", n:"0", name:"Visão geral", w:240, y:34},
+ {id:"c", n:"1", name:"Conteúdo", w:200, y:84},
+ {id:"d", n:"2", name:"Divisões", w:150, y:134},
+ {id:"s", n:"3", name:"Frase-tema", w:110, y:206, small:"10 palavras"},
+ {id:"a", n:"4", name:"Alvo", w:150, y:282},
+ {id:"ap", n:"5", name:"Aplicação", w:200, y:334},
+ {id:"final", n:"★", name:"Desafio final", w:240, y:390}
+];
+let state = {cur:"intro", xp:0, done:{}, got:{}};
+try{ const s=JSON.parse(localStorage.getItem("homil")); if(s) state=Object.assign(state,s);}catch(e){}
+const save=()=>{try{localStorage.setItem("homil",JSON.stringify(state))}catch(e){}};
+const $=s=>document.querySelector(s);
+function toast(t){const el=$("#toast");el.textContent=t;el.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove("show"),1800)}
+function award(key,pts,msg){ if(state.got[key]) return; state.got[key]=1; state.xp+=pts; $("#xp").textContent=state.xp; $("#xp").classList.remove("pop"); void $("#xp").offsetWidth; $("#xp").classList.add("pop"); toast(`+${pts} · ${msg||"Muito bem!"}`); save(); }
+function finish(id){ if(!state.done[id]){state.done[id]=1; award("done-"+id,20,"Estação concluída");} drawNav(); updProg(); }
+function updProg(){const n=Object.keys(state.done).length; $("#prog").style.width=(n/7*100)+"%"; $("#progtxt").textContent=`${n} de 7 estações`; $("#xp").textContent=state.xp;}
+
+function drawNav(){
+  const g=$("#hgsegs"); g.innerHTML="";
+  S.forEach(s=>{
+    const h=s.small?52:40, x=130-s.w/2;
+    const cls=["seg"]; if(state.done[s.id])cls.push("done"); if(state.cur===s.id)cls.push("on");
+    g.insertAdjacentHTML("beforeend",`<g class="${cls.join(" ")}" tabindex="0" role="listitem" data-id="${s.id}" aria-label="${s.name}">
+      <rect x="${x}" y="${s.y}" width="${s.w}" height="${h}" rx="8"/>
+      <text class="n" x="${x+12}" y="${s.y+(s.small?22:25)}">${s.n}</text>
+      <text x="130" y="${s.y+(s.small?22:25)}" text-anchor="middle">${s.name}</text>
+      ${s.small?`<text class="n" x="130" y="${s.y+42}" text-anchor="middle">${s.small}</text>`:""}</g>`);
+  });
+  g.querySelectorAll(".seg").forEach(el=>{
+    el.onclick=()=>go(el.dataset.id);
+    el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go(el.dataset.id)}};
+  });
+}
+function go(id){state.cur=id;save();drawNav();render();window.scrollTo({top:0,behavior:"smooth"})}
+
+/* ---------- componentes ---------- */
+function rules(key,list){
+  return `<ul class="rules" data-rules="${key}">${list.map((r,i)=>`<li class="rule" data-i="${i}"><button aria-expanded="false"><span class="k">${String(i+1).padStart(2,"0")}</span><span>${r[0]}</span><span class="chev">›</span></button><div class="body" hidden>${r[1]}</div></li>`).join("")}</ul>
+  <p class="hint" style="margin-top:10px">Abra todas as regras para ganhar <b>+10</b>.</p>`;
+}
+function bindRules(){
+  document.querySelectorAll("[data-rules]").forEach(ul=>{
+    const key=ul.dataset.rules;
+    ul.querySelectorAll(".rule").forEach(li=>{
+      li.querySelector("button").onclick=e=>{
+        const b=li.querySelector(".body"); b.hidden=!b.hidden; li.classList.toggle("open",!b.hidden); li.classList.add("seen");
+        e.currentTarget.setAttribute("aria-expanded",!b.hidden);
+        if([...ul.querySelectorAll(".rule")].every(x=>x.classList.contains("seen"))) award("rules-"+key,10,"Regras estudadas");
+      };
+    });
+  });
+}
+function quiz(key,qs){
+  return qs.map((q,qi)=>`<div class="card" data-quiz="${key}-${qi}"><div class="tag">Pergunta rápida</div><h3 style="margin:8px 0 12px">${q.q}</h3>
+    <div class="opts">${q.o.map((o,oi)=>`<button class="opt" data-ok="${oi===q.a}">${o}</button>`).join("")}</div>
+    <p class="fb" style="margin-top:10px"></p><p class="hint" hidden>${q.why||""}</p></div>`).join("");
+}
+function bindQuiz(){
+  document.querySelectorAll("[data-quiz]").forEach(c=>{
+    const key=c.dataset.quiz; let tries=0;
+    c.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+      if(c.dataset.solved) return; tries++;
+      const ok=b.dataset.ok==="true"; b.classList.add(ok?"right":"wrong");
+      const fb=c.querySelector(".fb"); fb.className="fb "+(ok?"ok":"no");
+      fb.textContent=ok?"Correto!":"Ainda não. Tente outra opção.";
+      if(ok){c.dataset.solved=1; c.querySelector(".hint").hidden=false; award("q-"+key,tries===1?15:5,tries===1?"Acertou de primeira":"Acertou");}
+    });
+  });
+}
+function sorter(key,items,labels){
+  // items: [texto, índice correto do rótulo]
+  return `<div class="sort" data-sort="${key}">${items.map((it,i)=>`<div class="item" data-ans="${it[1]}"><span>${it[0]}</span><div class="row">${labels.map((l,li)=>`<button class="opt" style="padding:6px 12px" data-l="${li}">${l}</button>`).join("")}</div></div>`).join("")}</div><p class="fb" data-sortfb="${key}" style="margin-top:10px"></p>`;
+}
+function bindSort(){
+  document.querySelectorAll("[data-sort]").forEach(w=>{
+    const key=w.dataset.sort;
+    w.querySelectorAll(".item").forEach(it=>it.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+      if(it.dataset.solved) return;
+      const ok=b.dataset.l===it.dataset.ans; b.classList.add(ok?"right":"wrong");
+      if(ok) it.dataset.solved=1;
+      const all=[...w.querySelectorAll(".item")], n=all.filter(x=>x.dataset.solved).length;
+      const fb=document.querySelector(`[data-sortfb="${key}"]`); fb.className="fb "+(n===all.length?"ok":"");
+      fb.textContent=n===all.length?"Tudo classificado!":`${n} de ${all.length} corretos`;
+      if(n===all.length) award("sort-"+key,20,"Classificação completa");
+    }));
+  });
+}
+const navrow=(prev,next,id)=>`<div class="navrow">${prev?`<button class="btn ghost" onclick="go('${prev}')">‹ Voltar</button>`:"<span></span>"}<button class="btn" onclick="finish('${id}');go('${next}')">Concluir e avançar ›</button></div>`;
+
+/* ---------- estações ---------- */
+const V = {
+intro:()=>`<section class="station">
+  <div class="card head"><span class="tag">Estação 0 · Visão geral</span><h2>O que é homilética?</h2>
+    <p>Homilética é uma análise de uma passagem das Escrituras. Os passos da homilética levam você a mergulhar na passagem e trazem mais compreensão do que você teria apenas lendo ou passando os olhos.</p>
+    <p>O objetivo é <b>entender e aplicar</b> o conteúdo de uma passagem bíblica à sua vida e à vida de quem você lidera. Tempo a sós com Deus, ouvindo-o falar por meio da Sua Palavra, beneficia todos os que preparam com cuidado.</p>
+    <p class="q">Ore pedindo entendimento. Leia a passagem.</p></div>
+  <div class="card"><h3 style="margin-bottom:12px">Os cinco passos básicos</h3>
+    <ol class="list" style="counter-reset:none">
+      <li><span><b>1. Conteúdo</b> · lista de tópicos ou eventos</span></li>
+      <li><span><b>2. Divisões</b> · frases-resumo</span></li>
+      <li><span><b>3. Frase-tema</b> · resumo da passagem</span></li>
+      <li><span><b>4. Alvo</b> · verdade ou princípio principal</span></li>
+      <li><span><b>5. Aplicações</b> · perguntas que motivam mudança</span></li>
+    </ol></div>
+  <div class="card"><h3>O fluxo da homilética</h3>
+    <p class="hint" style="margin:6px 0 14px">Veja a ampulheta: os passos 1 a 3 <b>pensam e reduzem</b> a passagem inteira até cerca de 10 palavras. Os passos 4 e 5 <b>aprendem e vivem</b>, abrindo a verdade para a vida inteira.</p>
+    <div class="levels">
+      <div class="level"><span class="pill">Passos 1·2·3</span><b>Fatos</b><small>Literal</small></div>
+      <div class="level"><span class="pill gold">Passo 4</span><b>Verdade</b><small>Espiritual</small></div>
+      <div class="level"><span class="pill ok">Passo 5</span><b>Aplicação</b><small>Prática</small></div>
+    </div></div>
+  ${quiz("intro",[{q:"Qual destes passos fica no ponto mais estreito da ampulheta?",o:["Conteúdo","Frase-tema","Aplicação"],a:1,why:"A frase-tema é a passagem inteira reduzida a cerca de 10 palavras."},
+   {q:"Os três primeiros passos tratam de quê?",o:["Dos fatos: nível literal","Da verdade: nível espiritual","Da aplicação: nível prático"],a:0}])}
+  ${navrow(null,"c","intro")}</section>`,
+
+c:()=>`<section class="station">
+  <div class="card head"><span class="tag">Passo 1 · Pense e reduza</span><h2>Conteúdo: lista de tópicos ou eventos</h2>
+    <p>Este passo foca nos detalhes da passagem e permite que Deus fale com você pessoalmente. Pergunte a si mesmo:</p>
+    <p class="q">“Do que trata esta passagem?”</p><p class="hint">Exemplo usado nas atividades: Romanos 3:21-26.</p></div>
+  <div class="card">${rules("c",[
+    ["Liste de 10 a 20 itens","Cada item pode conter um ou mais versículos."],
+    ["Escreva o número do versículo ao lado do item","Assim você sempre sabe de onde veio cada fato."],
+    ["Pense e reduza","Reduza a passagem inteira a uma lista de palavras, expressões ou frases que capturem o conteúdo. Seu estilo próprio se desenvolve com o tempo."],
+    ["Somente fatos","O objetivo é lembrar os fatos. Registre o que a passagem diz, não sua interpretação ou conclusão. Usar as mesmas palavras da Bíblia ajuda, mas não é obrigatório."],
+    ["Observe repetições, nomes, lugares e conversas","Palavras e expressões repetidas, nomes, lugares e diálogos merecem destaque."]])}</div>
+  <div class="card"><div class="tag">Atividade · Fato ou interpretação?</div><h3 style="margin:8px 0 12px">Classifique cada item da lista de conteúdo</h3>
+    ${sorter("c",[["Uma justiça que provém de Deus se manifestou, independente da Lei (v.21)",0],["Paulo estava frustrado com os judeus legalistas de Roma",1],["“Justiça” aparece repetida (vv.21, 22, 25, 26)",0],["Esta passagem nos ensina a parar de nos esforçar",1],["Todos pecaram e estão destituídos da glória de Deus (v.23)",0]],["Fato","Interpretação"])}</div>
+  <div class="card"><div class="tag">Atividade · Monte sua lista</div><h3 style="margin:8px 0 6px">Pratique com sua passagem</h3>
+    <p class="hint" style="margin-bottom:12px">Digite um item e o versículo. A meta é chegar a 10 itens.</p>
+    <div class="row"><input id="ci" type="text" placeholder="Ex.: São justificados gratuitamente por sua graça" style="flex:3 1 220px"><input id="cv" type="text" placeholder="v. 24" style="flex:1 1 80px"><button class="btn" id="cadd">Adicionar</button></div>
+    <p style="margin:12px 0 8px"><span class="pill" id="ccount">0 itens</span></p><ul class="list" id="clist"></ul></div>
+  ${navrow("intro","d","c")}</section>`,
+
+d:()=>`<section class="station">
+  <div class="card head"><span class="tag">Passo 2 · Pense e reduza</span><h2>Divisões: frases-resumo</h2>
+    <p>Organizar o conteúdo ajuda você a lembrar os detalhes e a reconhecer a progressão dentro da passagem.</p></div>
+  <div class="card">${rules("d",[
+    ["Reduza a lista a 2 a 4 seções","A lista de conteúdo fica ainda menor, dividida em duas a quatro seções que seguem a sequência da passagem e fazem sentido juntas."],
+    ["Uma frase breve por seção","Escreva uma frase breve e gramaticalmente correta, com sujeito e verbo, para resumir cada seção."],
+    ["Fique nos fatos","A frase relata o conteúdo factual da passagem, não sua interpretação ou conclusão."],
+    ["Versículos depois da frase","Escreva os versículos após a frase. Ex.: A justiça de Deus se manifesta mediante a fé em Jesus Cristo (21-22)."]])}</div>
+  <div class="card"><div class="tag">Atividade · Verificador de divisão</div><h3 style="margin:8px 0 12px">Escreva uma frase de divisão</h3>
+    <input id="dIn" type="text" placeholder="Ex.: Deus oferece Cristo como sacrifício para propiciação (25-26)">
+    <ul class="checks" id="dChk" style="margin-top:12px">
+      <li data-k="len">Frase breve (até 15 palavras)</li>
+      <li data-k="vs">Versículos no final, entre parênteses</li>
+      <li data-k="sv">Tem sujeito e verbo (confirme você mesmo) <label style="margin-left:6px"><input type="checkbox" id="dSv"> sim</label></li>
+      <li data-k="fact">É fato, não interpretação <label style="margin-left:6px"><input type="checkbox" id="dFa"> sim</label></li>
+    </ul></div>
+  ${quiz("d",[{q:"Qual é a melhor frase de divisão?",o:["Paulo, o maior teólogo, nos ensina que somos todos iguais","Todos pecaram e são justificados gratuitamente pela graça (23-24)","Pecado, graça e redenção"],a:1,why:"Tem sujeito e verbo, relata o fato e traz os versículos no final."},
+   {q:"Quantas seções a lista de conteúdo deve gerar?",o:["Uma só","De 2 a 4","De 10 a 20"],a:1}])}
+  ${navrow("c","s","d")}</section>`,
+
+s:()=>`<section class="station">
+  <div class="card head"><span class="tag">Passo 3 · Ponto mais estreito</span><h2>Frase-tema: resumo da passagem</h2>
+    <p>A frase-tema é um resumo factual da passagem inteira.</p></div>
+  <div class="card">${rules("s",[
+    ["Uma única frase de 10 a 15 palavras","Resuma os fatos da passagem. Inclua palavras que ajudem a identificá-la."],
+    ["Sujeito e verbo","A frase precisa ter sujeito e verbo."],
+    ["Fique nos fatos","O conteúdo da passagem, não sua interpretação ou conclusão."],
+    ["Junte as divisões e reduza","Incorpore suas frases de divisão e reduza a um resumo conciso. Comece com uma frase longa demais e refine até 10 a 15 palavras."],
+    ["Inclua detalhes que identifiquem","A frase deve distinguir esta passagem de passagens parecidas na Bíblia."]])}
+    <p class="hint" style="margin-top:14px">Os três primeiros passos focam nos fatos, com o objetivo de levar o conteúdo da passagem para a sua mente. Reduzir e refinar o conteúdo é um exercício inestimável para entender o texto.</p></div>
+  <div class="card"><div class="tag">Atividade · Contador de palavras</div><h3 style="margin:8px 0 6px">Reduza até caber na faixa verde</h3>
+    <p class="hint" style="margin-bottom:12px">Escreva primeiro uma frase longa e vá cortando até ficar entre 10 e 15 palavras.</p>
+    <textarea id="sIn" placeholder="Ex.: A justiça de Deus, testemunhada pela Lei e pelos Profetas, se manifesta mediante a fé em Jesus Cristo para todos os que creem, pois todos pecaram"></textarea>
+    <div class="meter" style="margin-top:12px"><div class="zone" style="left:${10/25*100}%;width:${5/25*100}%"></div><div class="fill" id="sFill"></div><span class="num" id="sNum">0 palavras</span></div>
+    <p class="fb" id="sFb" style="margin-top:10px"></p></div>
+  ${quiz("s",[{q:"Qual destas é uma frase-tema válida?",o:["A justiça de Deus","Deus quer que todos nós vivamos sem culpa e com alegria hoje","Deus manifesta sua justiça pela fé em Cristo e justifica gratuitamente os pecadores"],a:2,why:"Tem 13 palavras, sujeito e verbo, e só relata fatos que identificam a passagem."}])}
+  ${navrow("d","a","s")}</section>`,
+
+a:()=>`<section class="station">
+  <div class="card head"><span class="tag">Passo 4 · Aprenda e viva</span><h2>Alvo: verdade ou princípio principal</h2>
+    <p>Aqui saímos dos <b>fatos</b> da passagem para a <b>verdade</b> que ela ensina. O alvo é a principal verdade ou princípio que surge do texto bíblico, a conclusão-chave para aprender e lembrar. Pode refletir o que Deus imprimiu em você durante o estudo.</p></div>
+  <div class="card">${rules("a",[
+    ["Captura a verdade primária","O alvo captura a principal verdade ou princípio que o autor está transmitindo."],
+    ["Expressa a verdade de toda a passagem","Expressa a verdade principal ensinada ao longo de toda a passagem."],
+    ["Doutrinariamente correto e universal","Deve ser verdadeiro para todas as pessoas em todas as culturas e concordar com o ensino da Bíblia inteira, sem ser tirado do contexto."],
+    ["Sobre Deus, pessoas ou ambos","O alvo pode ser uma verdade sobre Deus, sobre pessoas ou sobre os dois."],
+    ["Leva a algum lugar","É uma verdade bíblica que conduz você adiante, em vez de apenas resumir os fatos."],
+    ["Começa com “Levar o público a aprender”","Em inglês, CATL: Cause Audience to Learn."]])}</div>
+  <div class="card"><div class="tag">Atividade · Construtor de alvo</div><h3 style="margin:8px 0 12px">Complete o seu alvo</h3>
+    <p><span class="prefix">Levar o público a aprender que</span></p>
+    <textarea id="aIn" style="margin-top:8px" placeholder="Ex.: Deus justifica gratuitamente, por sua graça, todo aquele que tem fé em Jesus"></textarea>
+    <p class="hint" style="margin:12px 0 6px">Avalie seu alvo:</p>
+    <ul class="checks" id="aChk">
+      ${["É uma verdade, não um resumo dos fatos","Vale para todas as pessoas em todas as culturas","Concorda com a Bíblia inteira, dentro do contexto","Fala de Deus, de pessoas ou de ambos"].map((t,i)=>`<li><label><input type="checkbox" data-a="${i}"> ${t}</label></li>`).join("")}
+    </ul></div>
+  <div class="card"><div class="tag">Atividade · Fato ou verdade?</div><h3 style="margin:8px 0 12px">Qual frase pertence a qual passo?</h3>
+    ${sorter("a",[["Todos pecaram e estão destituídos da glória de Deus",0],["Levar o público a aprender que ninguém é justificado por mérito, só pela graça",1],["Deus ofereceu Cristo como sacrifício para propiciação, pelo seu sangue",0],["Levar o público a aprender que Deus é justo e justificador daquele que tem fé em Jesus",1]],["Frase-tema (fato)","Alvo (verdade)"])}</div>
+  ${navrow("s","ap","a")}</section>`,
+
+ap:()=>`<section class="station">
+  <div class="card head"><span class="tag">Passo 5 · Aprenda e viva</span><h2>Aplicações: perguntas que motivam mudança</h2>
+    <p>Pegue o alvo e coloque-o no dia a dia. As aplicações motivam você e quem você lidera a pôr o alvo em ação. As perguntas levam o ensino principal da passagem ao coração e à vida.</p></div>
+  <div class="card">${rules("ap",[
+    ["Escreva em forma de pergunta","Toda aplicação é uma pergunta."],
+    ["Pelo menos uma por divisão","Prepare no mínimo uma aplicação para cada divisão."],
+    ["Mire o coração","O objetivo é transformar o coração, não apenas mudar o comportamento superficial."],
+    ["Equilibre convicção e encorajamento","Equilibre perguntas que convencem de pensamento errado com perguntas positivas que encorajam confiança e entrega a Deus."],
+    ["Equilibre avaliação e mudança","Equilibre perguntas que avaliam o pensar e o agir com perguntas que convidam à mudança: uma visão correta de Deus, confiança nele e prioridades."],
+    ["Direcione a quem precisa","As perguntas podem mirar você mesmo ou um grupo do público, como descrentes ou desanimados, ou fases da vida: estudantes, pais, trabalhadores, aposentados."]])}</div>
+  <div class="card"><div class="tag">Atividade · Banco de perguntas</div><h3 style="margin:8px 0 12px">Escreva suas aplicações</h3>
+    <div style="display:grid;gap:10px">
+      <input id="apIn" type="text" placeholder="Ex.: Em que área você ainda tenta conquistar com esforço a aceitação que Deus oferece de graça?">
+      <div class="row">
+        <label>Divisão <select id="apDiv" style="font:inherit;padding:6px;border-radius:8px;background:var(--bg);color:var(--ink);border:1px solid var(--line)"><option>1</option><option>2</option><option>3</option><option>4</option></select></label>
+        <label>Tipo <select id="apTipo" style="font:inherit;padding:6px;border-radius:8px;background:var(--bg);color:var(--ink);border:1px solid var(--line)"><option>Convicção</option><option>Encorajamento</option></select></label>
+        <label>Para <select id="apPub" style="font:inherit;padding:6px;border-radius:8px;background:var(--bg);color:var(--ink);border:1px solid var(--line)"><option>Eu mesmo</option><option>Descrentes</option><option>Desanimados</option><option>Estudantes</option><option>Pais</option><option>Trabalhadores</option><option>Aposentados</option></select></label>
+        <button class="btn" id="apAdd">Adicionar</button>
+      </div>
+      <p class="fb" id="apFb"></p>
+    </div>
+    <ul class="list" id="apList" style="margin-top:6px"></ul>
+    <p class="hint" id="apBal" style="margin-top:10px"></p></div>
+  ${quiz("ap",[{q:"Qual é a melhor aplicação?",o:["Leia Romanos 3 todos os dias.","Você precisa parar de se sentir culpado.","O que ainda faz você sentir que precisa merecer o perdão que Cristo já pagou?"],a:2,why:"Está em forma de pergunta e mira o coração, não só o comportamento."}])}
+  ${navrow("a","final","ap")}</section>`,
+
+final:()=>`<section class="station">
+  <div class="card head"><span class="tag">Desafio final</span><h2>Prove que domina o fluxo</h2><p>Coloque os cinco passos na ordem certa tocando nos botões.</p></div>
+  <div class="card"><div class="slots" id="slots">${[1,2,3,4,5].map(i=>`<div class="slot" data-i="${i}"><span class="pill">${i}</span><span></span></div>`).join("")}</div>
+    <div class="chips" id="chips" style="margin-top:14px"></div>
+    <div class="row" style="margin-top:14px"><button class="btn ghost" id="oReset">Recomeçar</button></div><p class="fb" id="oFb" style="margin-top:8px"></p></div>
+  <div class="card"><div class="tag">Fato, verdade ou aplicação?</div><h3 style="margin:8px 0 12px">Classifique</h3>
+    ${sorter("f",[["Deus manifesta sua justiça pela fé em Cristo e justifica gratuitamente os pecadores",0],["Levar o público a aprender que Deus justifica gratuitamente pela graça",1],["Quem você conhece que precisa ouvir que o perdão de Deus é de graça?",2],["Todos pecaram e são justificados gratuitamente por sua graça (23-24)",0]],["Fato","Verdade","Aplicação"])}</div>
+  ${quiz("f",[
+   {q:"Quantos itens deve ter a lista de conteúdo?",o:["De 2 a 4","De 10 a 20","De 10 a 15"],a:1},
+   {q:"A frase-tema deve ter:",o:["De 10 a 15 palavras","De 2 a 4 palavras","Quantas forem necessárias"],a:0},
+   {q:"O alvo começa com:",o:["“Esta passagem diz que…”","“Levar o público a aprender…”","“Você deve…”"],a:1},
+   {q:"Qual é o objetivo das perguntas de aplicação?",o:["Mudar o comportamento superficial","Transformar o coração","Revisar os fatos"],a:1},
+   {q:"O quarto passo está em qual nível?",o:["Literal","Espiritual","Prático"],a:1}])}
+  <div class="card" style="text-align:center"><div class="eyebrow">Sua pontuação</div><div class="big" id="finalXp">${state.xp}</div>
+    <p class="hint">Os três primeiros passos são os fatos: literal. O quarto é a verdade: espiritual. O quinto é a aplicação: prática.</p>
+    <div class="row" style="justify-content:center;margin-top:14px"><button class="btn" onclick="finish('final');document.getElementById('finalXp').textContent=state.xp">Concluir treinamento</button><button class="btn ghost" id="resetAll">Zerar progresso</button></div></div>
+</section>`
+};
+
+function render(){
+  $("#main").innerHTML=V[state.cur]();
+  bindRules(); bindQuiz(); bindSort();
+  const fn=binds[state.cur]; if(fn) fn();
+}
+const esc=t=>t.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const words=t=>t.trim().split(/\s+/).filter(Boolean).length;
+const binds={
+ c(){ const items=[]; const draw=()=>{ $("#clist").innerHTML=items.map((it,i)=>`<li><span>${esc(it[0])}</span><span class="pill">${esc(it[1]||"v. ?")}</span><button class="x" data-i="${i}" aria-label="Remover">✕</button></li>`).join("");
+      $("#ccount").textContent=`${items.length} ${items.length===1?"item":"itens"}`; $("#ccount").className="pill"+(items.length>=10?" ok":"");
+      $("#clist").querySelectorAll(".x").forEach(b=>b.onclick=()=>{items.splice(b.dataset.i,1);draw()});
+      if(items.length>=10) award("clist",25,"Lista de conteúdo com 10 itens"); };
+   const add=()=>{const t=$("#ci").value.trim(); if(!t) return; items.push([t,$("#cv").value.trim()]); $("#ci").value="";$("#cv").value="";$("#ci").focus();draw()};
+   $("#cadd").onclick=add; $("#ci").onkeydown=$("#cv").onkeydown=e=>{if(e.key==="Enter")add()}; },
+ d(){ const chk=()=>{const t=$("#dIn").value, w=words(t);
+     const r={len:w>0&&w<=15, vs:/\(\s*\d+([\-–,]\s*\d+)*\s*\)\s*\.?$/.test(t.trim()), sv:$("#dSv").checked, fact:$("#dFa").checked};
+     $("#dChk").querySelectorAll("li").forEach(li=>li.classList.toggle("ok",r[li.dataset.k]));
+     if(Object.values(r).every(Boolean)) award("dsent",20,"Frase de divisão aprovada"); };
+   $("#dIn").oninput=chk; $("#dSv").onchange=chk; $("#dFa").onchange=chk; },
+ s(){ $("#sIn").oninput=()=>{const w=words($("#sIn").value); $("#sFill").style.width=Math.min(w/25*100,100)+"%"; $("#sNum").textContent=w+(w===1?" palavra":" palavras");
+     const fb=$("#sFb"); if(!w){fb.textContent="";return}
+     if(w<10){fb.className="fb no";fb.textContent="Curta demais. Inclua detalhes que identifiquem a passagem."}
+     else if(w>15){fb.className="fb no";fb.textContent=`Corte mais ${w-15}. Pense e reduza.`}
+     else {fb.className="fb ok";fb.textContent="Na medida certa! Confirme: tem sujeito, verbo e só fatos?"; award("ssent",25,"Frase-tema na medida");}}; },
+ a(){ const chk=()=>{const boxes=[...document.querySelectorAll("#aChk input")]; boxes.forEach(b=>b.closest("li").classList.toggle("ok",b.checked));
+     if(words($("#aIn").value)>=4 && boxes.every(b=>b.checked)) award("aim",25,"Alvo construído");};
+   $("#aIn").oninput=chk; document.querySelectorAll("#aChk input").forEach(b=>b.onchange=chk); },
+ ap(){ const qs=[]; const draw=()=>{ $("#apList").innerHTML=qs.map(q=>`<li><span>${esc(q.t)}</span><span class="pill">Div. ${q.d}</span><span class="pill ${q.k==="Convicção"?"no":"ok"}">${q.k}</span><span class="pill gold">${q.p}</span></li>`).join("");
+     const c=qs.filter(q=>q.k==="Convicção").length, e=qs.length-c, divs=new Set(qs.map(q=>q.d)).size;
+     $("#apBal").textContent=qs.length?`${c} de convicção · ${e} de encorajamento · ${divs} ${divs===1?"divisão coberta":"divisões cobertas"}`:"";
+     if(c&&e&&divs>=2) award("apbal",25,"Aplicações equilibradas"); };
+   $("#apAdd").onclick=()=>{const t=$("#apIn").value.trim(), fb=$("#apFb");
+     if(!t){fb.className="fb no";fb.textContent="Escreva uma pergunta primeiro.";return}
+     if(!t.endsWith("?")){fb.className="fb no";fb.textContent="Aplicações são escritas em forma de pergunta. Termine com “?”.";return}
+     qs.push({t,d:$("#apDiv").value,k:$("#apTipo").value,p:$("#apPub").value}); $("#apIn").value=""; fb.className="fb ok";fb.textContent="Pergunta adicionada."; draw(); }; },
+ final(){ const steps=["Conteúdo","Divisões","Frase-tema","Alvo","Aplicações"]; let placed=[];
+   const shuffled=[...steps].sort(()=>Math.random()-.5);
+   const draw=()=>{ $("#chips").innerHTML=shuffled.map(s=>`<button class="chip" ${placed.includes(s)?"disabled":""}>${s}</button>`).join("");
+     document.querySelectorAll("#slots .slot").forEach((sl,i)=>{sl.className="slot"+(placed[i]?" filled":""); sl.lastElementChild.textContent=placed[i]||"";});
+     $("#chips").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{placed.push(b.textContent); draw(); if(placed.length===5) check();}); };
+   const check=()=>{let ok=0; document.querySelectorAll("#slots .slot").forEach((sl,i)=>{const r=placed[i]===steps[i]; if(r)ok++; sl.classList.add(r?"right":"wrong")});
+     const fb=$("#oFb"); if(ok===5){fb.className="fb ok";fb.textContent="Ordem perfeita!";award("order",30,"Fluxo dominado");} else {fb.className="fb no";fb.textContent=`${ok} de 5 no lugar certo. Recomece e tente de novo.`}};
+   $("#oReset").onclick=()=>{placed=[];$("#oFb").textContent="";draw()};
+   $("#resetAll").onclick=()=>{state={cur:"intro",xp:0,done:{},got:{}};save();updProg();go("intro")};
+   draw(); }
+};
+drawNav(); updProg(); render();
+</script>
+</body>
+</html>
